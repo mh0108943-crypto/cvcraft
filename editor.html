@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVCRAFT - Resume Editor</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- html2pdf Library for direct PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @media print {
+  /* Hide the top navbar, left form editor, buttons, and background */
+  body * {
+    visibility: hidden;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Make ONLY your resume paper element visible (replace .resume-preview with your actual container class/ID) */
+  .resume-preview,
+  .resume-preview * {
+    visibility: visible;
+  }
+
+  .resume-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 15mm;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+        :root {
+            --bg-dark: #0f0a1c;
+            --bg-editor: #161029;
+            --bg-input: #1f1738;
+            --accent-purple: #6c5ce7;
+            --accent-hover: #5b4bc4;
+            --accent-neon: #a29bfe;
+            --text-white: #ffffff;
+            --text-muted: #9490a5;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --danger-color: #ff7675;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Top Navigation Header --- */
+        header {
+            height: 60px;
+            background: var(--bg-editor);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .logo-icon {
+            background: var(--accent-purple);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .nav-links a.active {
+            color: var(--text-white);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #6c5ce7 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 10px 24px rgba(108, 92, 231, 0.35);
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #5b4bc4 0%, #7c3aed 100%);
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+        }
+
+        /* --- Editor Main Layout --- */
+        .editor-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        /* Left Form Panel */
+        .form-panel {
+            width: 45%;
+            background: linear-gradient(180deg, #161029 0%, #120d22 100%);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .form-section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: var(--text-white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dynamic-block {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .btn-remove-block {
+            background: transparent;
+            border: none;
+            color: var(--danger-color);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-white);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-purple);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* --- Add Content Button --- */
+        .add-content-wrapper {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-add-content {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 0.85rem 2rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(108, 92, 231, 0.6);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Right Preview Stage */
+        .preview-stage {
+            width: 55%;
+            background:
+                radial-gradient(circle at top, rgba(108, 92, 231, 0.15), transparent 35%),
+                #0a0614;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* --- Clean Printable A4 CV Container --- */
+        .cv-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            color: #1a202c;
+            padding: 20mm;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            transform-origin: top center;
+            transform: scale(0.85);
+            font-family: 'Inter', sans-serif;
+            border: 1px solid rgba(108, 92, 231, 0.22);
+        }
+
+        .cv-header {
+            border-bottom: 2px solid #6c5ce7;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cv-header h1 {
+            font-size: 2rem;
+            color: #0f172a;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .cv-header .job-title {
+            font-size: 1.1rem;
+            color: #6c5ce7;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .cv-contact {
+            display: flex;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+
+        .cv-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .cv-section h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .cv-item {
+            margin-bottom: 0.8rem;
+        }
+
+        .cv-item-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .cv-item-sub {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+        }
+
+        .cv-section p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        /* --- Add Content Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 5, 24, 0.75);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #161029;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            position: relative;
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .modal-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .import-banner {
+            background: rgba(108, 92, 231, 0.12);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            border-radius: 12px;
+            padding: 0.75rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .import-text {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .import-text strong {
+            color: #ffffff;
+            display: block;
+        }
+
+        .btn-import {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .section-card {
+            background: #1f1738;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 1.2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .section-card:hover {
+            background: #281e47;
+            border-color: var(--accent-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            background: rgba(108, 92, 231, 0.2);
+            color: var(--accent-neon);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-info h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-info p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .custom-card {
+            border: 1px dashed rgba(108, 92, 231, 0.5);
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        /* --- CSS PRINT OVERRIDES --- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #cv-paper,
+            #cv-paper * {
+                visibility: visible !important;
+            }
+
+            #cv-paper {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 20mm !important;
+                transform: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background: #ffffff !important;
+                color: #1a202c !important;
+            }
+
+            html,
+            body {
+                background: #ffffff !important;
+                overflow: visible !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">Cv</div>
+            <span>CVCRAFT</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">Overview</a>
+            <a href="#" class="active">Content</a>
+            <a href="#">Customize</a>
+        </div>
+        <div class="action-btns">
+            <button class="btn-download" onclick="generateSmartCV()">
+                <i data-lucide="sparkles" size="16"></i> Generate CV
+            </button>
+            <button class="btn-download" onclick="exportPDF()">
+                <i data-lucide="download" size="16"></i> Download PDF
+            </button>
+        </div>
+    </header>
+
+    <!-- Workspace Container -->
+    <div class="editor-container">
+
+        <!-- Left Input Form -->
+        <div class="form-panel">
+            <div class="form-section-title">Your Personal Info</div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="input-name" class="form-control" value="Alex Morgan" oninput="updateCV()">
+            </div>
+
+            <div class="form-group">
+                <label>Job Title</label>
+                <input type="text" id="input-title" class="form-control" value="Software Engineer" oninput="updateCV()">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" id="input-email" class="form-control" value="alex@example.com"
+                        oninput="updateCV()">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="input-phone" class="form-control" value="+1 (555) 019-2834"
+                        oninput="updateCV()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Address / Location</label>
+                <input type="text" id="input-location" class="form-control" value="Cairo, Egypt" oninput="updateCV()">
+            </div>
+
+            <div class="form-section-title" style="margin-top: 2rem;">Summary</div>
+            <div class="form-group">
+                <textarea id="input-summary" class="form-control"
+                    oninput="updateCV()">Passionate developer focusing on high quality web applications and scalable solutions.</textarea>
+            </div>
+
+            <!-- Container where dynamic sections (Education, Skills, etc.) get injected -->
+            <div id="dynamic-form-sections"></div>
+
+            <!-- Add Content Button Trigger -->
+            <div class="add-content-wrapper">
+                <button type="button" class="btn-add-content" onclick="openAddContentModal()">
+                    <i data-lucide="plus" size="18"></i> Add Content
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Live Preview Sheet -->
+        <div class="preview-stage">
+            <div id="cv-paper" class="cv-paper">
+                <div class="cv-header">
+                    <h1 id="cv-name">Alex Morgan</h1>
+                    <div id="cv-title" class="job-title">Software Engineer</div>
+                    <div class="cv-contact">
+                        <span id="cv-email">alex@example.com</span> •
+                        <span id="cv-phone">+1 (555) 019-2834</span> •
+                        <span id="cv-location">Cairo, Egypt</span>
+                    </div>
+                </div>
+
+                <div class="cv-section">
+                    <h2>Summary</h2>
+                    <p id="cv-summary">Passionate developer focusing on high quality web applications and scalable
+                        solutions.</p>
+                </div>
+
+                <!-- Container where preview sections get injected in real time -->
+                <div id="dynamic-cv-sections"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add Content Modal -->
+    <div id="add-content-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2>Add Content</h2>
+                    <p>Choose a section to add to your resume</p>
+                </div>
+
+                <div class="import-banner">
+                    <div class="import-text">
+                        <i data-lucide="upload-cloud" size="18"></i>
+                        <div>
+                            <strong>Already have a resume?</strong>
+                            <span>Import it to prefill your content.</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-import">Import Resume</button>
+                </div>
+
+                <button type="button" class="modal-close" onclick="closeAddContentModal()">&times;</button>
+            </div>
+
+            <div class="modal-grid">
+                <div class="section-card" onclick="addSection('Education')">
+                    <div class="card-icon"><i data-lucide="graduation-cap" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Education</h3>
+                        <p>Add your degrees, certifications, and academic focus.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Experience')">
+                    <div class="card-icon"><i data-lucide="briefcase" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Professional Experience</h3>
+                        <p>Add your work roles, internships, and key achievements.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Skills')">
+                    <div class="card-icon"><i data-lucide="wrench" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Skills</h3>
+                        <p>Highlight technical skills and frameworks you use.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Languages')">
+                    <div class="card-icon"><i data-lucide="languages" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Languages</h3>
+                        <p>Add spoken languages and proficiency levels.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Certificates')">
+                    <div class="card-icon"><i data-lucide="award" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Certificates</h3>
+                        <p>Include relevant industry certifications and licenses.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Projects')">
+                    <div class="card-icon"><i data-lucide="folder-git-2" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Projects</h3>
+                        <p>Showcase key personal or open-source software projects.</p>
+                    </div>
+                </div>
+
+                <div class="section-card" onclick="addSection('Publications')">
+                    <div class="card-icon"><i data-lucide="book-open" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Publications</h3>
+                        <p>Add research papers, articles, or technical writing.</p>
+                    </div>
+                </div>
+
+                <div class="section-card custom-card" onclick="addSection('Custom')">
+                    <div class="card-icon"><i data-lucide="puzzle" size="20"></i></div>
+                    <div class="card-info">
+                        <h3>Custom Section</h3>
+                        <p>Create a custom section tailored specifically for your needs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const resumePresets = {
+            'Software Engineer': {
+                name: 'Alex Morgan',
+                title: 'Software Engineer',
+                email: 'alex@example.com',
+                phone: '+1 (555) 019-2834',
+                location: 'Cairo, Egypt',
+                summary: 'Passionate developer focusing on high quality web applications and scalable solutions.'
+            },
+            'UI Designer': {
+                name: 'Nora Ibrahim',
+                title: 'UI Designer',
+                email: 'nora@example.com',
+                phone: '+966 55 123 4567',
+                location: 'Riyadh, Saudi Arabia',
+                summary: 'Creative UI designer delivering elegant interfaces and user-centered digital experiences.'
+            },
+            'Marketing Specialist': {
+                name: 'Sara Ahmed',
+                title: 'Marketing Specialist',
+                email: 'sara@example.com',
+                phone: '+971 50 987 6543',
+                location: 'Dubai, UAE',
+                summary: 'Results-focused marketing specialist with a strong record in campaign strategy, optimization, and brand growth.'
+            }
+        };
+
+        function setField(id, value) {
+            const field = document.getElementById(id);
+            if (field) field.value = value;
+        }
+
+        function getResumeRole() {
+            return localStorage.getItem('currentResumeRole') || 'Software Engineer';
+        }
+
+        function applyPreset(role) {
+            const preset = resumePresets[role] || resumePresets['Software Engineer'];
+            setField('input-name', preset.name);
+            setField('input-title', preset.title);
+            setField('input-email', preset.email);
+            setField('input-phone', preset.phone);
+            setField('input-location', preset.location);
+            setField('input-summary', preset.summary);
+        }
+
+        function persistResume() {
+            const data = {
+                name: document.getElementById('input-name').value,
+                title: document.getElementById('input-title').value,
+                email: document.getElementById('input-email').value,
+                phone: document.getElementById('input-phone').value,
+                location: document.getElementById('input-location').value,
+                summary: document.getElementById('input-summary').value
+            };
+            localStorage.setItem('cvcraftResumeData', JSON.stringify(data));
+        }
+
+        function loadSavedResume() {
+            const saved = localStorage.getItem('cvcraftResumeData');
+            if (!saved) {
+                applyPreset(getResumeRole());
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(saved);
+                setField('input-name', parsed.name || '');
+                setField('input-title', parsed.title || '');
+                setField('input-email', parsed.email || '');
+                setField('input-phone', parsed.phone || '');
+                setField('input-location', parsed.location || '');
+                setField('input-summary', parsed.summary || '');
+            } catch (error) {
+                applyPreset(getResumeRole());
+            }
+        }
+
+        function generateSmartCV() {
+            applyPreset(getResumeRole());
+            persistResume();
+            updateCV();
+            alert('A fresh CV template has been generated for your selected role.');
+        }
+
+        // 1. Static Info Live Binding
+        function updateCV() {
+            document.getElementById('cv-name').innerText = document.getElementById('input-name').value;
+            document.getElementById('cv-title').innerText = document.getElementById('input-title').value;
+            document.getElementById('cv-email').innerText = document.getElementById('input-email').value;
+            document.getElementById('cv-phone').innerText = document.getElementById('input-phone').value;
+            document.getElementById('cv-location').innerText = document.getElementById('input-location').value;
+            document.getElementById('cv-summary').innerText = document.getElementById('input-summary').value;
+            persistResume();
+        }
+
+        loadSavedResume();
+        updateCV();
+
+        // 2. Modal Handlers
+        function openAddContentModal() {
+            document.getElementById('add-content-modal').classList.add('active');
+        }
+
+        function closeAddContentModal() {
+            document.getElementById('add-content-modal').classList.remove('active');
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('add-content-modal');
+            if (event.target === modal) {
+                closeAddContentModal();
+            }
+        };
+
+        // 3. Dynamic Section Generator Engine
+        let sectionCounter = 0;
+
+        function addSection(type) {
+            closeAddContentModal();
+            sectionCounter++;
+            const sectionId = `sec-${sectionCounter}`;
+
+            const formContainer = document.getElementById('dynamic-form-sections');
+            const cvContainer = document.getElementById('dynamic-cv-sections');
+
+            // Create Form Block
+            const formBlock = document.createElement('div');
+            formBlock.className = 'dynamic-block';
+            formBlock.id = `form-${sectionId}`;
+
+            // Create CV Preview Block
+            const cvBlock = document.createElement('div');
+            cvBlock.className = 'cv-section';
+            cvBlock.id = `preview-${sectionId}`;
+
+            let formHtml = '';
+            let cvHtml = '';
+
+            switch (type) {
+                case 'Education':
+                    formHtml = `
+            <div class="form-section-title">
+              Education
+              <button class="btn-remove-block" onclick="removeSection('${sectionId}')"><i data-lucide="trash-2" size="14"></i> Remove</button>
+            </div>
+            <div class="form-group"><label>Degree / Field of Study</label><input type="text" class="form-control" placeholder="B.Sc. in Computer Science" oninput="syncSection('${sectionId}')" id="field-degree-${sectionId}"></div>
+            <div class="form-group"><label>University / Institution</label><input type="text" class="form-control" placeholder="University Name" oninput="syncSection('${sectionId}')" id="field-school-${sectionId}"></div>
+            <div class="grid-2">
+              <div class="form-group"><label>Dates</label><input type="text" class="form-control" placeholder="2020 - 2024" oninput="syncSection('${sectionId}')" id="field-dates-${sectionId}"></div>
+            </div>
+          `;
+                    cvHtml = `
+            <h2>Education</h2>
+            <div class="cv-item">
+              <div class="cv-item-header">
+                <span id="cv-degree-${sectionId}">B.Sc. in Computer Science</span>
+                <span id="cv-dates-${sectionId}">2020 - 2024</span>
+              </div>
+              <div class="cv-item-sub" id="cv-school-${sectionId}">University Name</div>
+            </div>
+          `;
+                    break;
+
+                case 'Experience':
+                    formHtml = `
+            <div class="form-section-title">
+              Experience
+              <button class="btn-remove-block" onclick="removeSection('${sectionId}')"><i data-lucide="trash-2" size="14"></i> Remove</button>
+            </div>
+            <div class="form-group"><label>Role / Position</label><input type="text" class="form-control" placeholder="Senior Developer" oninput="syncSection('${sectionId}')" id="field-role-${sectionId}"></div>
+            <div class="form-group"><label>Company</label><input type="text" class="form-control" placeholder="Company Name" oninput="syncSection('${sectionId}')" id="field-company-${sectionId}"></div>
+            <div class="form-group"><label>Dates</label><input type="text" class="form-control" placeholder="2021 - Present" oninput="syncSection('${sectionId}')" id="field-dates-${sectionId}"></div>
+            <div class="form-group"><label>Description</label><textarea class="form-control" placeholder="Describe your responsibilities..." oninput="syncSection('${sectionId}')" id="field-desc-${sectionId}"></textarea></div>
+          `;
+                    cvHtml = `
+            <h2>Professional Experience</h2>
+            <div class="cv-item">
+              <div class="cv-item-header">
+                <span id="cv-role-${sectionId}">Senior Developer</span>
+                <span id="cv-dates-${sectionId}">2021 - Present</span>
+              </div>
+              <div class="cv-item-sub" id="cv-company-${sectionId}">Company Name</div>
+              <p id="cv-desc-${sectionId}">Describe your responsibilities...</p>
+            </div>
+          `;
+                    break;
+
+                case 'Skills':
+                case 'Languages':
+                case 'Certificates':
+                case 'Projects':
+                case 'Publications':
+                case 'Custom':
+                default:
+                    formHtml = `
+            <div class="form-section-title">
+              ${type}
+              <button class="btn-remove-block" onclick="removeSection('${sectionId}')"><i data-lucide="trash-2" size="14"></i> Remove</button>
+            </div>
+            <div class="form-group"><label>Details</label><textarea class="form-control" placeholder="Enter details..." oninput="syncSection('${sectionId}')" id="field-desc-${sectionId}"></textarea></div>
+          `;
+                    cvHtml = `
+            <h2>${type}</h2>
+            <p id="cv-desc-${sectionId}">Enter details...</p>
+          `;
+                    break;
+            }
+
+            formBlock.innerHTML = formHtml;
+            cvBlock.innerHTML = cvHtml;
+
+            formContainer.appendChild(formBlock);
+            cvContainer.appendChild(cvBlock);
+
+            lucide.createIcons();
+        }
+
+        // 4. Live Syncing between Form Inputs and Preview
+        function syncSection(sectionId) {
+            const degreeInput = document.getElementById(`field-degree-${sectionId}`);
+            const schoolInput = document.getElementById(`field-school-${sectionId}`);
+            const roleInput = document.getElementById(`field-role-${sectionId}`);
+            const companyInput = document.getElementById(`field-company-${sectionId}`);
+            const datesInput = document.getElementById(`field-dates-${sectionId}`);
+            const descInput = document.getElementById(`field-desc-${sectionId}`);
+
+            if (degreeInput) document.getElementById(`cv-degree-${sectionId}`).innerText = degreeInput.value;
+            if (schoolInput) document.getElementById(`cv-school-${sectionId}`).innerText = schoolInput.value;
+            if (roleInput) document.getElementById(`cv-role-${sectionId}`).innerText = roleInput.value;
+            if (companyInput) document.getElementById(`cv-company-${sectionId}`).innerText = companyInput.value;
+            if (datesInput) document.getElementById(`cv-dates-${sectionId}`).innerText = datesInput.value;
+            if (descInput) document.getElementById(`cv-desc-${sectionId}`).innerText = descInput.value;
+        }
+
+        // 5. Remove Dynamic Section
+        function removeSection(sectionId) {
+            document.getElementById(`form-${sectionId}`).remove();
+            document.getElementById(`preview-${sectionId}`).remove();
+        }
+
+        // 6. Direct PDF Export
+        function exportPDF() {
+            const element = document.getElementById('cv-paper');
+            const opt = {
+                margin: 0,
+                filename: 'My_CV.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+
+</html>
