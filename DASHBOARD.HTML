@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVCRAFT - Free Resume Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(99, 102, 241, 0.22), transparent 25%),
+                radial-gradient(circle at top right, rgba(139, 92, 246, 0.18), transparent 30%),
+                linear-gradient(135deg, #06070B, #0A0C14 45%, #0E1220);
+            color: #F3F4F6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        aside {
+            width: 280px;
+            background: rgba(15, 17, 26, 0.92);
+            backdrop-filter: blur(14px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem 1rem;
+            flex-shrink: 0;
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.025);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: #FFFFFF;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            color: #FFF;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            list-style: none;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            color: #9CA3AF;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+        }
+
+        .nav-item.active a {
+            background-color: #6366F1;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .free-badge-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .free-badge-card h4 {
+            font-size: 0.9rem;
+            color: #10B981;
+            margin-bottom: 0.2rem;
+        }
+
+        .free-badge-card p {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            line-height: 1.3;
+        }
+
+        main {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            overflow-y: auto;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .hero-panel {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(30, 41, 59, 0.72));
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 20px;
+            padding: 1.4rem 1.5rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            background: rgba(99, 102, 241, 0.18);
+            color: #C7D2FE;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 0.9rem;
+        }
+
+        .hero-copy h2 {
+            font-size: 1.55rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .hero-copy p {
+            color: #A5B4C8;
+            font-size: 0.92rem;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.7rem 0.95rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .stat-pill strong {
+            font-size: 1rem;
+            display: block;
+            color: #FFF;
+        }
+
+        .stat-pill span {
+            font-size: 0.72rem;
+            color: #9CA3AF;
+        }
+
+        .dash-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .btn-create-new {
+            background: #6366F1;
+            color: #FFF;
+            padding: 0.75rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-create-new:hover {
+            background: #4F46E5;
+        }
+
+        .resumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resume-card {
+            background: linear-gradient(180deg, rgba(15, 17, 26, 0.96), rgba(12, 14, 22, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .resume-card:hover {
+            border-color: #6366F1;
+            transform: translateY(-4px);
+            box-shadow: 0 14px 35px rgba(99, 102, 241, 0.18);
+        }
+
+        .thumbnail-wrapper {
+            background: linear-gradient(180deg, #ffffff, #eef2ff);
+            height: 220px;
+            border-radius: 12px;
+            padding: 0.9rem;
+            color: #1F2937;
+            font-size: 0.58rem;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.12);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #FFF;
+            margin-top: 0.65rem;
+        }
+
+        .create-card {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            min-height: 290px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .create-card:hover {
+            border-color: #6366F1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active-section {
+            display: block;
+        }
+
+        .account-card,
+        .settings-card {
+            background-color: #0F111A;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #9CA3AF;
+        }
+
+        .info-value {
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: #EF4444;
+            color: #FFF;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: #0F111A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 460px;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-desc {
+            font-size: 0.85rem;
+            color: #9CA3AF;
+            margin-bottom: 1.2rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #08090E;
+            color: #FFF;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+
+        .btn-confirm {
+            background: #6366F1;
+            color: #FFF;
+            border: none;
+            padding: 0.75rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-confirm:hover {
+            background: #4F46E5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside>
+        <div>
+            <div class="brand">
+                <div class="brand-icon">Cv</div>
+                <span>CVCRAFT</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item active"><a onclick="navigateTo('dashboard', this.parentElement)">Dashboard</a></li>
+                <li class="nav-item"><a onclick="handleMyResumes(this.parentElement)">My Resumes</a></li>
+                <li class="nav-item"><a onclick="navigateTo('account', this.parentElement)">My Account</a></li>
+                <li class="nav-item"><a onclick="navigateTo('settings', this.parentElement)">Settings</a></li>
+            </ul>
+        </div>
+
+        <div class="free-badge-card">
+            <h4>🎉 100% Free Forever</h4>
+            <p>Enjoy unlimited resume creations & exports!</p>
+        </div>
+    </aside>
+
+    <main>
+        <div class="dash-header">
+            <div class="dash-title">
+                <h1 id="userWelcome">Welcome 👋</h1>
+                <p style="color:#9CA3AF; font-size: 0.95rem;">Ready to build your next winning resume?</p>
+            </div>
+            <button class="btn-create-new" id="btnCreateNew">+ Create New Resume</button>
+        </div>
+
+        <div class="hero-panel">
+            <div class="hero-copy">
+                <span class="hero-badge">Smart resume builder</span>
+                <h2>Build a standout CV in minutes</h2>
+                <p>Pick a resume type, edit your details, and export a clean professional PDF.</p>
+            </div>
+            <div class="stats-row">
+                <div class="stat-pill"><strong>3+</strong><span>Templates</span></div>
+                <div class="stat-pill"><strong>1 click</strong><span>Generate</span></div>
+                <div class="stat-pill"><strong>PDF</strong><span>Export</span></div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <h2 id="sectionTitle" style="font-size: 1.2rem;">Dashboard</h2>
+            <p style="color:#9CA3AF; font-size:0.9rem; margin-top:0.35rem;">Pick a resume type to generate a polished CV
+                instantly.</p>
+        </div>
+
+        <!-- Section 1: Dashboard -->
+        <div id="sec-resumes" class="content-section active-section">
+            <div class="resumes-grid">
+                <div class="resume-card" onclick="openResume('Software Engineer')">
+                    <div class="thumbnail-wrapper">
+                        <strong id="cardUserName">User Name</strong><br>
+                        <span style="color: #6366F1;">Software Engineer</span>
+                    </div>
+                    <div class="card-title">Software Engineer CV</div>
+                </div>
+
+                <div class="resume-card" onclick="openResume('UI Designer')">
+                    <div class="thumbnail-wrapper">
+                        <strong id="cardUserName2">Creative Profile</strong><br>
+                        <span style="color: #6366F1;">UI Designer</span>
+                    </div>
+                    <div class="card-title">UI Designer CV</div>
+                </div>
+
+                <div class="resume-card" onclick="openResume('Marketing Specialist')">
+                    <div class="thumbnail-wrapper">
+                        <strong id="cardUserName3">Brand Builder</strong><br>
+                        <span style="color: #6366F1;">Marketing Specialist</span>
+                    </div>
+                    <div class="card-title">Marketing CV</div>
+                </div>
+
+                <div class="create-card" id="cardCreateNew">
+                    <div style="font-size: 2rem; color: #6366F1;">+</div>
+                    <span style="color: #9CA3AF; font-weight: 600;">Create New</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: My Account -->
+        <div id="sec-account" class="content-section">
+            <div class="account-card">
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value" id="accName">---</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value" id="accEmail">---</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Password</span>
+                    <span class="info-value" id="accPassword">••••••••</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Access Plan</span>
+                    <span class="info-value" style="color: #10B981;">Free Unlimited Access 🚀</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Settings -->
+        <div id="sec-settings" class="content-section">
+            <div class="settings-card">
+                <div class="info-row">
+                    <span class="info-label">User Name</span>
+                    <span class="info-value" id="settName">---</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Logged-in Account</span>
+                    <span class="info-value" id="settEmail">---</span>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()">Log Out</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sign In Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <div class="modal-title">Welcome to CVCRAFT 🚀</div>
+            <div class="modal-desc">Enter your details to access your free workspace.</div>
+            <input type="text" class="modal-input" id="loginName" placeholder="Full Name">
+            <input type="email" class="modal-input" id="loginEmail" placeholder="Email Address">
+            <input type="password" class="modal-input" id="loginPass" placeholder="Password">
+            <button class="btn-confirm" onclick="handleSignIn()">Start Building Free</button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                openModal('loginModal');
+            } else {
+                updateUI(currentUser);
+            }
+        });
+
+        function handleSignIn() {
+            const name = document.getElementById('loginName').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if (!name || !email || !pass) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const user = { name, email, pass };
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            closeModal('loginModal');
+            updateUI(user);
+        }
+
+        function updateUI(user) {
+            document.getElementById('userWelcome').innerText = `Welcome back, ${user.name} 👋`;
+            document.getElementById('cardUserName').innerText = user.name;
+            document.getElementById('accName').innerText = user.name;
+            document.getElementById('accEmail').innerText = user.email;
+            document.getElementById('accPassword').innerText = '•'.repeat(user.pass.length);
+            document.getElementById('settName').innerText = user.name;
+            document.getElementById('settEmail').innerText = user.email;
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('currentUser');
+                location.reload();
+            }
+        }
+
+        function navigateTo(sec, el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
+
+            if (sec === 'account') document.getElementById('sec-account').classList.add('active-section');
+            else if (sec === 'settings') document.getElementById('sec-settings').classList.add('active-section');
+            else document.getElementById('sec-resumes').classList.add('active-section');
+        }
+
+        function handleMyResumes(el) {
+            if (localStorage.getItem('currentResumeRole')) {
+                window.location.href = 'editor.html';
+            } else {
+                navigateTo('dashboard', el);
+            }
+        }
+
+        function openResume(role) {
+            localStorage.setItem('currentResumeRole', role);
+            window.location.href = 'editor.html';
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        document.getElementById('btnCreateNew').addEventListener('click', () => openResume('Software Engineer'));
+        document.getElementById('cardCreateNew').addEventListener('click', () => openResume('Software Engineer'));
+    </script>
+</body>
+
+</html>
