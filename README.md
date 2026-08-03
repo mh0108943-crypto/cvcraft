@@ -11,5 +11,5 @@ CVCRAFT is a web application for building, customizing, and exporting ATS-friend
 * HTML5, CSS3, JavaScript
 
 ## How to Run
-1. Download or clone this repository.
-2. Open `dashboard.html` in your web browser.
+1. Clone the repository or download the source files.
+2. Open `dashboard.html` or `editor.html` directly in any modern web browser.
