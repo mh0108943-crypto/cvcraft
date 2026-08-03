@@ -1,7 +1,8 @@
 # CVCRAFT
 
-CVCRAFT is a web application for building, customizing, and exporting ATS-friendly resumes.
+🚀 **[Live Demo](https://mh0108943-crypto.github.io/cvcraft/)**
 
+CVCRAFT is a web application for building, customizing, and exporting ATS-friendly resumes.
 ## Features
 * Real-time resume builder and live preview
 * Clean, ATS-friendly layouts
