@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CVCRAFT - Free Resume Builder</title>
@@ -9,6 +10,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        @media print {
+  /* Hide UI elements, navigation, and input forms */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Reset page padding and force standard A4 page size */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Show ONLY your inner resume container (replace .cv-paper with your actual class) */
+  .cv-paper,
+  .cv-paper * {
+    visibility: visible;
+  }
+
+  .cv-paper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 15mm;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
         * {
             box-sizing: border-box;
             margin: 0;
